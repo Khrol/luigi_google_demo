@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+"google-cloud-bigquery" = "*"
+luigi = "*"
+"google-api-python-client" = "*"
+"google-auth-httplib2" = "*"
+fastavro = "*"
+pandas = "*"
+
+
+[dev-packages]
