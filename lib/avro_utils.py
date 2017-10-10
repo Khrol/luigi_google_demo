@@ -44,29 +44,3 @@ def dataframe_from_storage(gs_path):
 def dataframe_to_storage(dataframe, schema, gs_path):
     stream = GsStreamWriter(gs_path)
     fastavro.writer(stream, schema, dataframe.to_dict('records'), codec='deflate')
-
-
-if __name__ == '__main__':
-    import schema
-
-    countries = [
-        {'id': 1, 'name': 'Belarus'},
-        {'id': 2, 'name': 'Ukraine'},
-        {'id': 3, 'name': 'Poland'},
-    ]
-
-    dataframe_to_storage(pd.DataFrame(countries), schema.countries, 'countries.avro')
-
-    developers = [
-        {'id': 10, 'name': 'Vasya', 'country_id': 1},
-        {'id': 11, 'name': 'Kolya', 'country_id': 1},
-        {'id': 12, 'name': 'Mikola', 'country_id': 2},
-        {'id': 13, 'name': 'Luda', 'country_id': 2},
-        {'id': 14, 'name': 'Alex', 'country_id': 2},
-        {'id': 15, 'name': 'Grisha', 'country_id': 2},
-        {'id': 16, 'name': 'Leh', 'country_id': 3},
-        {'id': 17, 'name': 'Paul', 'country_id': 3},
-        {'id': 18, 'name': 'Jan', 'country_id': 3},
-    ]
-
-    dataframe_to_storage(pd.DataFrame(developers), schema.developers, 'developers.avro')

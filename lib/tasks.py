@@ -16,21 +16,17 @@ class AvroBigQueryTask(luigi.Task):
     project = luigi.Parameter(default='analytics-warehouse-dev')
 
     def requires(self):
-        return self.task
+        return [self.task()]
 
     def run(self):
         client = BigQueryClient()
         job = client.load_table_from_storage(
-            'demo-avro-upload-from-gs-{}-{}'.format(self.dataset, self.task.table),
+            'demo-avro-upload-from-gs-{}-{}-{}'.format(self.dataset, self.task.table, int(time())),
             BigQueryTable(self.task.table, BigQueryDataset(self.dataset, client, project=self.project)),
-            self.task.output.path
+            self.task().output().path
         )
-        job.begin()
-        start = time()
-        while time() - start < 600:  # 10 minutes
-            if job.state == 'DONE':
-                return
-        raise TimeoutError
+        job.source_format = 'AVRO'
+        return job.result(timeout=600)
 
     def output(self):
         return BigQueryTarget(self.project, self.dataset, self.task.table)
@@ -40,7 +36,9 @@ class TableTask(luigi.Task):
     table = luigi.Parameter()
 
     def run(self):
-        params = {k: dataframe_from_storage(v.gs_path()) for k, v in self.requires().items()}
+        params = {}
+        if self.requires():
+            params = {k: dataframe_from_storage(v.gs_path()) for k, v in self.requires().items()}
         result = self.main(**params)
         dataframe_to_storage(result, getattr(schema, self.table), self.gs_path())
 
