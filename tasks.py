@@ -7,7 +7,7 @@ class Developers(TableTask):
 
     def main(self):
         developers = [
-            {'id': 10, 'name': 'Igor', 'country_id': 1},
+            {'id': 10, 'name': 'Igor', 'country_id': 100},
         ]
         return pd.DataFrame(developers)
 
@@ -17,7 +17,7 @@ class Countries(TableTask):
 
     def main(self):
         countries = [
-            {'id': 1, 'name': 'Belarus'},
+            {'id': 100, 'name': 'Belarus'},
         ]
         return pd.DataFrame(countries)
 
@@ -33,7 +33,8 @@ class DevelopersByCountries(TableTask):
 
     def main(self, developers, countries):
         joined_data = developers[['country_id']]\
-            .merge(countries, how='left', left_on='country_id', right_on='id')
-        result = joined_data.groupby('name').size().to_frame().reset_index()
+            .merge(countries, how='outer', left_on='country_id', right_on='id')
+        result = joined_data.groupby('name').agg({'country_id': lambda p: len(p.dropna())}).reset_index()
         result.columns = ['country', 'developers_count']
+        result.developers_count = result.developers_count.astype(int)
         return result
